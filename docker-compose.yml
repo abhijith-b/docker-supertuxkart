@@ -4,6 +4,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./server_config.xml:/stk/server_config.xml
+      - ./stk/stkservers.db:/stk/stkservers.db
+      - ./motd.txt:/stk/motd.txt
     environment:
       USERNAME: "username"
       PASSWORD: "password"

@@ -2,7 +2,7 @@
 <server-config version="6" >
 
     <!-- Name of server, encode in XML if you want to use unicode characters. -->
-    <server-name value="tripper's STK Server" />
+    <server-name value="STK Server IN" />
 
     <!-- Port used in server, if you specify 0, it will use the server port specified in stk_config.xml. If you wish to use a random port, set random-server-port to '1' in user config. STK will automatically switch to a random port if the port you specify fails to be bound. -->
     <server-port value="0" />
@@ -32,7 +32,7 @@
     <private-server-password value="" />
 
     <!-- Message of today shown in lobby, you can enter encoded XML words here or a file.txt and let STK load it. -->
-    <motd value="welcome to tripper's stk server, have fun" />
+    <motd value="motd.txt" />
 
     <!-- If this value is set to false, the server will ignore chat messages from all players. -->
     <chat value="true" />
@@ -74,7 +74,7 @@
     <min-start-game-players value="2" />
 
     <!-- Automatically end linear race game after 1st player finished for some time (currently his finished time * 0.25 + 15.0). -->
-    <auto-end value="false" />
+    <auto-end value="true" />
 
     <!-- Enable team choosing in lobby in team game (soccer and CTF). If owner-less is enabled and live-players is not enabled, than this option is always disabled. -->
     <team-choosing value="true" />
@@ -131,7 +131,7 @@
     <state-frequency value="10" />
 
     <!-- Use sql database for handling server stats and maintenance, STK needs to be compiled with sqlite3 supported. -->
-    <sql-management value="false" />
+    <sql-management value="true" />
 
     <!-- Database filename for sqlite to use, it can be shared for all servers created in this machine, and STK will create specific table for each server. You need to create the database yourself first, see NETWORKING.md for details -->
     <database-file value="stkservers.db" />
@@ -152,7 +152,7 @@
     <player-reports-table value="player_reports" />
 
     <!-- Days to keep player reports, older than that will be auto cleared, 0 to keep them forever. -->
-    <player-reports-expired-days value="3" />
+    <player-reports-expired-days value="7" />
 
     <!-- IP geolocation table, you only need this table if you want to geolocate IP from non-stk-addons connection, as all validated players connecting from stk-addons will provide the location info, you need to create the table first, see NETWORKING.md for details, empty to disable. This table can be shared for all servers if you use the same name. -->
     <ip-geolocation-table value="ip_mapping" />
