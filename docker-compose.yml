@@ -6,6 +6,7 @@ services:
       - ./server_config.xml:/stk/server_config.xml
       - ./stk/stkservers.db:/stk/stkservers.db
       - ./motd.txt:/stk/motd.txt
+      - ./stk/addons/:/stk/supertuxkart/addons/
     environment:
       USERNAME: "username"
       PASSWORD: "password"
@@ -18,5 +19,6 @@ services:
 
 networks:
   stk-network:
+    enable_ipv6: true
 
 
