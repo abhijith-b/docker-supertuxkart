@@ -1,76 +1,119 @@
 # -----------
 # Build stage
 # -----------
-    FROM ubuntu:24.04 AS build
+    FROM debian:bookworm-slim AS build
     LABEL maintainer="jwestp"
     WORKDIR /stk
     
-    # Set stk version to build
-    #ENV VERSION=1.4
+    # Build arguments for version control
+    ARG STK_VERSION=master
+    ARG BUILD_DATE
+    ARG VCS_REF
     
-    # Install build dependencies
+    # Install build dependencies (following official STK build guide)
     ARG DEBIAN_FRONTEND=noninteractive
-    RUN apt-get update && \
+    RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+        --mount=type=cache,target=/var/lib/apt,sharing=locked \
+        apt-get update && \
         apt-get install --no-install-recommends -y \
+            # Build tools
             build-essential \
             cmake \
             git \
+            subversion \
+            pkg-config \
+            ca-certificates \
+            # Core STK dependencies (exact match from official docs)
+            libbluetooth-dev \
+            libsdl2-dev \
             libcurl4-openssl-dev \
             libenet-dev \
+            libfreetype6-dev \
+            libharfbuzz-dev \
+            libjpeg62-turbo-dev \
+            libogg-dev \
+            libopenal-dev \
+            libpng-dev \
             libssl-dev \
-            pkg-config \
-            subversion \
+            libvorbis-dev \
+            libmbedtls-dev \
             zlib1g-dev \
-            ca-certificates \
-            libsqlite3-dev \
-            libsqlite3-0 \
-            dpkg \
-            libbluetooth-dev libsdl2-dev \
-            libfreetype6-dev libharfbuzz-dev \
-            libjpeg-dev libogg-dev libopenal-dev libpng-dev \
-            libvorbis-dev libmbedtls-dev \
-            && \
-            rm -rf /var/lib/apt/lists/*
+            # Additional dependencies for server build
+            libsqlite3-dev
     
-    # Clone source code
-    RUN git clone https://github.com/supertuxkart/stk-code stk-code
+    # Clone source code with specific versions for reproducibility
+    RUN git clone --depth=1 --branch=${STK_VERSION} https://github.com/supertuxkart/stk-code stk-code || \
+        git clone --depth=1 https://github.com/supertuxkart/stk-code stk-code
     RUN svn co https://svn.code.sf.net/p/supertuxkart/code/stk-assets stk-assets
     
-    # Build server
-    RUN mkdir stk-code/cmake_build && \
+    # Build server (following official cmake options)
+    RUN --mount=type=cache,target=/stk/stk-code/cmake_build,sharing=locked \
+        mkdir -p stk-code/cmake_build && \
         cd stk-code/cmake_build && \
         cmake .. \
             -DSERVER_ONLY=ON \
-            -USE_SQLITE3=ON \
+            -DUSE_SQLITE3=ON \
             -DUSE_SYSTEM_ENET=ON \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_FLAGS="-O3 -march=native" && \
+            -DBUILD_RECORDER=OFF \
+            -DNO_SHADERC=ON \
+            -DCMAKE_CXX_FLAGS="-O3" && \
         make -j$(nproc) && \
         make install
     
     # -----------
     # Final stage
     # -----------
-    FROM ubuntu:24.04
-    LABEL maintainer="jwestp"
+    FROM debian:bookworm-slim
+    
+    # Import build arguments
+    ARG STK_VERSION=${STK_VERSION}
+    ARG BUILD_DATE
+    ARG VCS_REF
+    
+    # Metadata labels following OCI standards
+    LABEL maintainer="jwestp" \
+          org.label-schema.name="SuperTuxKart Server" \
+          org.label-schema.description="Containerized SuperTuxKart dedicated server with SQLite support" \
+          org.label-schema.version="${STK_VERSION}" \
+          org.label-schema.build-date="${BUILD_DATE}" \
+          org.label-schema.vcs-ref="${VCS_REF}" \
+          org.label-schema.vcs-url="https://github.com/supertuxkart/stk-code" \
+          org.label-schema.schema-version="1.0"
     
     # Create non-root user for security
     RUN useradd -r -s /bin/false stk
     WORKDIR /stk
     
-    # Install runtime dependencies
-    RUN apt-get update && \
+    # Install runtime dependencies (minimal set for STK server)
+    RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+        --mount=type=cache,target=/var/lib/apt,sharing=locked \
+        apt-get update && \
         apt-get install --no-install-recommends -y \
-            libcurl4-openssl-dev \
-            tzdata \
-            dnsutils \
-            curl ca-certificates \
+            # Core runtime libraries (matching STK build dependencies)
+            libcurl4 \
+            libssl3 \
+            libsqlite3-0 \
+            libenet7 \
+            libfreetype6 \
+            libharfbuzz0b \
+            libjpeg62-turbo \
+            libogg0 \
+            libopenal1 \
+            libpng16-16 \
+            libvorbis0a \
+            zlib1g \
+            libbluetooth3 \
+            libsdl2-2.0-0 \
+            # System utilities
+            netcat-openbsd \
             sqlite3 \
+            tzdata \
+            # Optional utilities (can be removed for smaller image)
+            curl \
+            dnsutils \
             unzip \
-            wget \
-             cron \
-            libssl3 && \
-        rm -rf /var/lib/apt/lists/*
+            wget
     
     # Copy artifacts from build stage
     COPY --from=build /usr/local/bin/supertuxkart /usr/local/bin/
@@ -85,7 +128,7 @@
     
     # Expose the ports used to find and connect to the server
     EXPOSE 2757/udp
-    EXPOSE 2759/tcp
+    EXPOSE 2759/udp
     
     ENTRYPOINT ["/stk/start.sh"]
 

@@ -1,0 +1,42 @@
+# Git and version control
+.git
+.gitignore
+.github/
+
+# Documentation
+README.md
+*.md
+
+# Development files
+*.log
+*.tmp
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files
+docker-compose.yml
+docker-compose.override.yml
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# STK data directories (these will be populated by addons.py)
+stk/addons/tracks/
+stk/addons/karts/
+stk/addons/*.xml
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.part
+tmp/
+temp/

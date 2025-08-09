@@ -1,21 +1,35 @@
 services:
-   stk-server:
+  stk-server:
     image: stk-server
     restart: unless-stopped
     volumes:
       - ./server_config.xml:/stk/server_config.xml
-      - ./stk/stkservers.db:/stk/stkservers.db
+      - ./stk:/stk/supertuxkart
       - ./motd.txt:/stk/motd.txt
-      - ./stk/addons/:/stk/supertuxkart/addons/
+      - ./stkservers.db:/stk/stkservers.db
     environment:
-      USERNAME: "username"
-      PASSWORD: "password"
+      USERNAME: "your_stk_username"  # Change this to your STK account username
+      PASSWORD: "your_stk_password"  # Change this to your STK account password
       #AI_KARTS: 1
     ports:
       - "2757:2757/udp"
       - "2759:2759/udp"
     networks:
       - stk-network
+    # Resource limits to prevent server overload
+    # Health check to monitor server status
+    healthcheck:
+      test: ["CMD", "nc", "-z", "-u", "localhost", "2759"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
 
 networks:
   stk-network:

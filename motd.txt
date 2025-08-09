@@ -1,0 +1,10 @@
+Welcome to SuperTuxKart Server!
+
+🏁 This server features:
+• High-difficulty racing (SuperTux level)
+• Up to 16 players supported
+• AI kart assistance available
+• Live spectating enabled
+• Multiple game modes: races, soccer, CTF, FFA
+
+🎮 Have fun racing and may the best kart win!
