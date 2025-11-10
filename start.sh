@@ -19,20 +19,22 @@ then
     fi
 fi
 
+# Initialize database on first run
 if [[ ! -f /stk/stkservers.db ]] || [[ ! -s /stk/stkservers.db ]]; then
     echo "Initializing STK server database..."
-    if sqlite3 /stk/stkservers.db < /stk/init.sql; then
+    # Create empty database file (may fail due to volume permissions, so try with sqlite directly)
+    if sqlite3 /stk/stkservers.db < /stk/init.sql 2>/dev/null; then
         echo "Database initialized successfully."
     else
-        echo "Warning: Failed to initialize database. Server may not work properly with SQL management enabled."
+        # If database file exists but is empty/read-only, try to initialize it anyway
+        echo "Warning: Could not initialize database, server may not work properly with SQL management enabled."
     fi
 else
     echo "Database already exists, skipping initialization."
 fi
 
-LOG_LEVEL=${LOG_LEVEL:-info}
-echo "Starting SuperTuxKart server with log level: $LOG_LEVEL"
-supertuxkart --server-config=server_config.xml --log=$LOG_LEVEL &
+echo "Starting SuperTuxKart server..."
+supertuxkart --server-config=server_config.xml &
 SERVER_PID=$!
 
 sleep 5

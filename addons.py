@@ -37,7 +37,7 @@ def determine_addons_directory():
     current_dir = pathlib.Path.cwd()
     
     # Docker/project directory (for containerized usage)
-    docker_addons_dir = current_dir / 'stk/addons'
+    docker_addons_dir = current_dir / 'stk/supertuxkart/addons'
     
     # System STK directory (for native STK installations)
     home_dir = pathlib.Path.home()

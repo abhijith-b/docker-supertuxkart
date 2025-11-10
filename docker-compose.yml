@@ -1,12 +1,13 @@
 services:
   stk-server:
+    build: .
     image: stk-server
     restart: unless-stopped
     volumes:
       - ./server_config.xml:/stk/server_config.xml
-      - ./stk:/stk/supertuxkart
+      - ./stk/supertuxkart:/stk/supertuxkart
+      - ./stk/stkservers.db:/stk/stkservers.db
       - ./motd.txt:/stk/motd.txt
-      - ./stkservers.db:/stk/stkservers.db
     environment:
       USERNAME: "your_stk_username"
       PASSWORD: "your_stk_password"

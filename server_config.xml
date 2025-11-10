@@ -20,7 +20,7 @@
     <soccer-goal-target value="false" />
 
     <!-- Enable wan server, which requires you to have an stk-addons account with a saved session. Check init-user command for details. -->
-    <wan-server value="true" />
+    <wan-server value="false" />
 
     <!-- Enable network console, which can do for example kickban. -->
     <enable-console value="false" />
