@@ -8,23 +8,28 @@ services:
       - ./motd.txt:/stk/motd.txt
       - ./stkservers.db:/stk/stkservers.db
     environment:
-      USERNAME: "your_stk_username"  # Change this to your STK account username
-      PASSWORD: "your_stk_password"  # Change this to your STK account password
+      USERNAME: "your_stk_username"
+      PASSWORD: "your_stk_password"
       #AI_KARTS: 1
     ports:
       - "2757:2757/udp"
       - "2759:2759/udp"
     networks:
       - stk-network
-    # Resource limits to prevent server overload
-    # Health check to monitor server status
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
     healthcheck:
       test: ["CMD", "nc", "-z", "-u", "localhost", "2759"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-    # Logging configuration
     logging:
       driver: "json-file"
       options:
@@ -34,5 +39,3 @@ services:
 networks:
   stk-network:
     enable_ipv6: true
-
-

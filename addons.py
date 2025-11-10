@@ -31,9 +31,34 @@ except ImportError:
 headers = {'User-Agent': 'Mozilla/5.0 (compatible; STKAddonDownloader/0.2; +https://github.com/user/stk-addon-downloader)'}
 timeout = 60
 
-# Use current directory for Docker volume mapping
+# Determine addon directory based on environment
+def determine_addons_directory():
+    """Determine the appropriate addons directory based on the environment."""
+    current_dir = pathlib.Path.cwd()
+    
+    # Docker/project directory (for containerized usage)
+    docker_addons_dir = current_dir / 'stk/addons'
+    
+    # System STK directory (for native STK installations)
+    home_dir = pathlib.Path.home()
+    system_addons_dir = home_dir / '.local/share/supertuxkart/addons'
+    
+    # Check if we're in a Docker project directory
+    if (current_dir / 'docker-compose.yml').exists() or (current_dir / 'Dockerfile').exists():
+        print(f"Docker environment detected, using: {docker_addons_dir}")
+        return docker_addons_dir
+    
+    # Check if system STK directory exists and has content
+    if system_addons_dir.exists():
+        print(f"System STK installation detected, using: {system_addons_dir}")
+        return system_addons_dir
+    
+    # Default to Docker directory structure
+    print(f"No existing STK installation found, creating Docker structure: {docker_addons_dir}")
+    return docker_addons_dir
+
 current_dir = pathlib.Path.cwd()
-addons_dir = current_dir / 'stk/addons'
+addons_dir = determine_addons_directory()
 
 # Create necessary XML file paths
 news_xml = addons_dir / 'online_news.xml'
@@ -376,7 +401,7 @@ def get_filter_function(filter_type: str) -> Callable[[Dict], bool]:
 def parse_arguments():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(
-        description='SuperTuxKart Addon Downloader (Docker Edition)',
+        description='SuperTuxKart Addon Downloader - Auto-detects Docker/System STK installations',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Filter options:
@@ -385,6 +410,12 @@ Filter options:
   tracks-only - Only tracks and arenas
   high-rated  - Addons with rating >= 2.8 stars
   recent      - Addons updated within last year
+
+Directory detection:
+  The script automatically detects whether you're using:
+  - Docker setup (./stk/addons/) - when docker-compose.yml or Dockerfile present
+  - System STK (~/.local/share/supertuxkart/addons/) - when system directory exists
+  - Use --addons-dir to override automatic detection
         '''
     )
     
@@ -417,6 +448,12 @@ Filter options:
         '--debug', '-d',
         action='store_true',
         help='Show detailed filtering information and debug output'
+    )
+    
+    parser.add_argument(
+        '--addons-dir',
+        type=pathlib.Path,
+        help='Override automatic directory detection and use specified path'
     )
     
     return parser.parse_args()
@@ -603,19 +640,23 @@ def install_addons(all_addons, installed_addons, install_filter=lambda _: True, 
     print(f"- Failed: {status['error']}")
     print("="*50)
 
-def verify_docker_setup() -> None:
-    """Verify the directory structure is correct for Docker volume mapping"""
+def verify_setup() -> None:
+    """Verify the directory structure and provide appropriate usage instructions"""
     try:
-        # Check if we're in the correct directory structure for Docker
-        docker_compose_path = current_dir / 'docker-compose.yml'
-        if not docker_compose_path.exists() and not (current_dir / 'compose.yaml').exists():
-            print("Note: No docker-compose.yml/compose.yaml found in current directory.")
-            print("Make sure this script is run from the same directory as your Docker Compose file.")
+        # Determine if we're in a Docker environment
+        is_docker_env = (current_dir / 'docker-compose.yml').exists() or (current_dir / 'Dockerfile').exists()
+        is_system_stk = addons_dir == pathlib.Path.home() / '.local/share/supertuxkart/addons'
         
-        # Verify the addons directory structure
-        expected_dir = current_dir / 'stk/addons'
-        if expected_dir != addons_dir:
-            print(f"Warning: Expected addons directory at {expected_dir}, but using {addons_dir}")
+        if is_docker_env:
+            print("Docker environment detected.")
+            if not (current_dir / 'docker-compose.yml').exists() and not (current_dir / 'compose.yaml').exists():
+                print("Note: No docker-compose.yml/compose.yaml found in current directory.")
+                print("Make sure this script is run from the same directory as your Docker Compose file.")
+        elif is_system_stk:
+            print("System STK installation detected.")
+            print("Addons will be installed for your local STK installation.")
+        else:
+            print("Custom addons directory specified.")
         
         # Create directories if they don't exist
         for type_dir in ['tracks', 'karts']:
@@ -623,26 +664,44 @@ def verify_docker_setup() -> None:
             addon_type_dir.mkdir(parents=True, exist_ok=True)
             print(f"Verified directory: {addon_type_dir}")
         
-        print("Docker setup verification complete.")
-        print("Remember to restart your STK Docker container after adding new addons.")
+        # Provide appropriate post-installation instructions
+        if is_docker_env:
+            print("Setup verification complete.")
+            print("Remember to restart your STK Docker container after adding new addons:")
+            print("  docker-compose restart")
+        elif is_system_stk:
+            print("Setup verification complete.")
+            print("Restart STK to see the new addons.")
+        else:
+            print("Setup verification complete.")
+            print("Make sure your STK installation uses the specified addons directory.")
         
     except Exception as e:
-        print(f"Error verifying Docker setup: {str(e)}")
+        print(f"Error verifying setup: {str(e)}")
         traceback.print_exc()
 
 if __name__ == '__main__':
     args = parse_arguments()
     
+    # Override addons directory if specified
+    if args.addons_dir:
+        addons_dir = args.addons_dir
+        print(f"Using specified addons directory: {addons_dir}")
+        # Reinitialize XML paths
+        news_xml = addons_dir / 'online_news.xml'
+        addons_xml = addons_dir / 'addons.xml'
+        installed_xml = addons_dir / 'addons_installed.xml'
+    
     print("="*50)
-    print("SuperTuxKart Addon Downloader (Docker Edition)")
+    print("SuperTuxKart Addon Downloader")
     print("="*50)
     print(f"Addons directory: {addons_dir}")
     print(f"Filter: {args.filter}")
     print(f"Mode: {'Non-interactive' if args.non_interactive else 'Interactive'}")
     
     try:
-        # Verify Docker setup
-        verify_docker_setup()
+        # Verify setup
+        verify_setup()
         
         print("\nReading installed addons...")
         installed_addons = get_installed_addons()
@@ -697,4 +756,9 @@ if __name__ == '__main__':
             traceback.print_exc()
     
     if not args.list_only:
-        print("\nDone! Remember to restart your STK Docker container to apply the changes.")
+        is_docker_env = (current_dir / 'docker-compose.yml').exists() or (current_dir / 'Dockerfile').exists()
+        if is_docker_env:
+            print("\nDone! Remember to restart your STK Docker container to apply the changes:")
+            print("  docker-compose restart")
+        else:
+            print("\nDone! Restart STK to see the new addons.")

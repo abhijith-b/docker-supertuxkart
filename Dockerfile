@@ -118,7 +118,7 @@
     # Copy artifacts from build stage
     COPY --from=build /usr/local/bin/supertuxkart /usr/local/bin/
     COPY --from=build /usr/local/share/supertuxkart /usr/local/share/supertuxkart/
-    COPY start.sh /stk/
+    COPY start.sh init.sql /stk/
     
     # Set permissions and switch user
     RUN chown -R stk:stk /stk && \

@@ -1,0 +1,44 @@
+CREATE TABLE IF NOT EXISTS ip_ban (
+    ip_start INTEGER UNSIGNED NOT NULL UNIQUE,
+    ip_end INTEGER UNSIGNED NOT NULL UNIQUE,
+    starting_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expired_days REAL NULL DEFAULT NULL,
+    reason TEXT NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    trigger_count INTEGER UNSIGNED NOT NULL DEFAULT 0,
+    last_trigger TIMESTAMP NULL DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ipv6_ban (
+    ipv6_cidr TEXT NOT NULL UNIQUE,
+    starting_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expired_days REAL NULL DEFAULT NULL,
+    reason TEXT NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    trigger_count INTEGER UNSIGNED NOT NULL DEFAULT 0,
+    last_trigger TIMESTAMP NULL DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS online_id_ban (
+    online_id INTEGER UNSIGNED NOT NULL UNIQUE,
+    starting_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expired_days REAL NULL DEFAULT NULL,
+    reason TEXT NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    trigger_count INTEGER UNSIGNED NOT NULL DEFAULT 0,
+    last_trigger TIMESTAMP NULL DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS player_reports (
+    server_uid TEXT NOT NULL,
+    reporter_ip INTEGER UNSIGNED NOT NULL,
+    reporter_ipv6 TEXT NOT NULL DEFAULT '',
+    reporter_online_id INTEGER UNSIGNED NOT NULL,
+    reporter_username TEXT NOT NULL,
+    reported_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    info TEXT NOT NULL,
+    reporting_ip INTEGER UNSIGNED NOT NULL,
+    reporting_ipv6 TEXT NOT NULL DEFAULT '',
+    reporting_online_id INTEGER UNSIGNED NOT NULL,
+    reporting_username TEXT NOT NULL
+);

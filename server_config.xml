@@ -2,7 +2,7 @@
 <server-config version="6" >
 
     <!-- Name of server, encode in XML if you want to use unicode characters. -->
-    <server-name value="STK Server IN" />
+    <server-name value="STK Server" />
 
     <!-- Port used in server, if you specify 0, it will use the server port specified in stk_config.xml. If you wish to use a random port, set random-server-port to '1' in user config. STK will automatically switch to a random port if the port you specify fails to be bound. -->
     <server-port value="0" />
@@ -11,7 +11,7 @@
     <server-mode value="3" />
 
     <!-- Difficulty in server, 0 is beginner, 1 is intermediate, 2 is expert and 3 is supertux (the most difficult). -->
-    <server-difficulty value="3" />
+    <server-difficulty value="0" />
 
     <!-- Number of grand prix tracks per game (If grand prix enabled). -->
     <gp-track-count value="3" />
@@ -26,13 +26,13 @@
     <enable-console value="false" />
 
     <!-- Maximum number of players on the server, setting this to a value greater than 8 can cause performance degradation. -->
-    <server-max-players value="16" />
+    <server-max-players value="8" />
 
     <!-- Password for private server, leave empty for a public server. -->
     <private-server-password value="" />
 
     <!-- Message of today shown in lobby, you can enter encoded XML words here or a file.txt and let STK load it. -->
-    <motd value="motd.txt" />
+    <motd value="" />
 
     <!-- If this value is set to false, the server will ignore chat messages from all players. -->
     <chat value="true" />
@@ -53,16 +53,16 @@
     <validating-player value="true" />
 
     <!-- Disable it to turn off all stun related code in server, it allows for saving of server resources if your server is not behind a firewall. -->
-    <firewalled-server value="false" />
+    <firewalled-server value="true" />
 
-    <!-- Enable to allow IPv6 connection if you have a public IPv6 address. STK currently uses dual-stack mode which requires server to have both IPv4 and IPv6 and listen to same port. If STK detects your server has no public IPv6 address or port differs between IPv4 and IPv6 then it will use IPv4 only socket. For system which doesn't support dual-stack socket (like OpenBSD) you may fail to be connected by IPv4 clients. -->
+    <!-- Enable to allow IPv6 connection if you have a public IPv6 address. STK currently uses dual-stack mode which requires server to have both IPv4 and IPv6 and listen to same port. If STK detects your server has no public IPv6 address or port differs between IPv4 and IPv6 then it will use IPv4 only socket. For system which doesn't support dual-stack socket (like OpenBSD) you may fail to be connected by IPv4 clients. You can override the detection in config.xml at supertuxkart config-0.10 folder, with default-ip-type option. -->
     <ipv6-connection value="true" />
 
     <!-- No server owner in lobby which can control the starting of game or kick any players. -->
     <owner-less value="false" />
 
     <!-- Time to wait before entering kart selection screen if satisfied min-start-game-players below for owner less or ranked server. -->
-    <start-game-counter value="30" />
+    <start-game-counter value="60" />
 
     <!-- Clients below this value will be rejected from joining this server. It's determined by number of official karts in client / number of official karts in server -->
     <official-karts-threshold value="1" />
@@ -74,9 +74,9 @@
     <min-start-game-players value="2" />
 
     <!-- Automatically end linear race game after 1st player finished for some time (currently his finished time * 0.25 + 15.0). -->
-    <auto-end value="true" />
+    <auto-end value="false" />
 
-    <!-- Enable team choosing in lobby in team game (soccer and CTF). If owner-less is enabled and live-players is not enabled, than this option is always disabled. -->
+    <!-- Enable team choosing in lobby in team game (soccer and CTF). If owner-less is enabled and live-spectate is not enabled, than this option is always disabled. -->
     <team-choosing value="true" />
 
     <!-- If strict-players is on, no duplicated online id or split screen players are allowed, which can prevent someone using more than 1 network AI with this server. -->
@@ -86,7 +86,7 @@
     <ranked value="false" />
 
     <!-- If true, the server owner can config the difficulty and game mode in the GUI of lobby. This option cannot be used with owner-less or grand prix server, and will be automatically turned on if the server was created using the in-game GUI. The changed difficulty and game mode will not be saved in this config file. -->
-    <server-configurable value="true" />
+    <server-configurable value="false" />
 
     <!-- If true, players can live join or spectate the in-progress game. Currently live joining is only available if the current game mode used in server is FFA, CTF or soccer, also official-karts-threshold will be made 1.0. If false addon karts will use their original hitbox other than tux, all players having it restriction applies. -->
     <live-spectate value="true" />
@@ -131,7 +131,7 @@
     <state-frequency value="10" />
 
     <!-- Use sql database for handling server stats and maintenance, STK needs to be compiled with sqlite3 supported. -->
-    <sql-management value="true" />
+    <sql-management value="false" />
 
     <!-- Database filename for sqlite to use, it can be shared for all servers created in this machine, and STK will create specific table for each server. You need to create the database yourself first, see NETWORKING.md for details -->
     <database-file value="stkservers.db" />
@@ -152,7 +152,7 @@
     <player-reports-table value="player_reports" />
 
     <!-- Days to keep player reports, older than that will be auto cleared, 0 to keep them forever. -->
-    <player-reports-expired-days value="7" />
+    <player-reports-expired-days value="3" />
 
     <!-- IP geolocation table, you only need this table if you want to geolocate IP from non-stk-addons connection, as all validated players connecting from stk-addons will provide the location info, you need to create the table first, see NETWORKING.md for details, empty to disable. This table can be shared for all servers if you use the same name. -->
     <ip-geolocation-table value="ip_mapping" />
@@ -161,7 +161,7 @@
     <ipv6-geolocation-table value="ipv6_mapping" />
 
     <!-- If true this server will auto add / remove AI connected with network-ai=x, which will kick N - 1 bot(s) where N is the number of human players. Only use this for non-GP racing server. -->
-    <ai-handling value="true" />
+    <ai-handling value="false" />
 
     <!-- If true this server will allow AI instance to be connected from anywhere. (other than LAN network only) -->
     <ai-anywhere value="false" />

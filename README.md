@@ -155,6 +155,9 @@ This repository includes an enhanced addon management system (`addons.py`) that 
    # Show detailed filtering decisions (debug mode)
    python3 addons.py --debug --list-only
    
+   # Use system STK directory (for native installations)
+   python3 addons.py --addons-dir ~/.local/share/supertuxkart/addons
+   
    # Get help
    python3 addons.py --help
    ```
@@ -162,6 +165,7 @@ This repository includes an enhanced addon management system (`addons.py`) that 
 ### Features
 
 - **Multi-threaded downloads** with progress bars (up to 5 concurrent downloads)
+- **Multi-environment support** - automatically detects Docker vs native STK installations
 - **Smart filtering** with multiple preset options:
   - **Default**: Tracks, arenas, and featured karts only (recommended for most users)
   - **All**: Every available addon including all karts (~5GB download)
@@ -169,7 +173,10 @@ This repository includes an enhanced addon management system (`addons.py`) that 
   - **High-rated**: Only addons with user rating ≥2.8 stars
   - **Recent**: Only addons updated within the last year
 - **Automatic updates** for existing addons when newer revisions are available
-- **Docker-aware** directory structure (`./stk/addons/`)
+- **Environment-aware** directory handling:
+  - **Docker**: Uses `./stk/addons/` when `docker-compose.yml` present
+  - **System STK**: Uses `~/.local/share/supertuxkart/addons/` for native installations
+  - **Custom**: Manual override with `--addons-dir`
 - **Resume capability** - interrupted downloads can be resumed safely
 - **Skip duplicate downloads** - already downloaded files are automatically skipped
 - **Safe cancellation** - Ctrl+C preserves completed installations
@@ -203,6 +210,12 @@ python3 addons.py --filter tracks-only
 
 # Preview what would be installed without downloading
 python3 addons.py --list-only --filter all
+
+# Install addons for native STK installation (auto-detected on Fedora/Linux)
+python3 addons.py --addons-dir ~/.local/share/supertuxkart/addons
+
+# Force Docker mode even when system STK is present
+python3 addons.py --addons-dir ./stk/addons
 ```
 
 ### Troubleshooting
@@ -226,16 +239,18 @@ This enhanced version includes several advanced features not found in the basic 
 
 ### SQLite Database Integration
 
-**Important**: This setup has `sql-management="true"` enabled, which requires manual database initialization.
+**Enhanced**: This setup has `sql-management="true"` enabled with **automatic database initialization**.
 
-#### Database Setup (Required)
+#### Database Setup (Automatic)
 
-1. **Create the database**:
-   ```bash
-   sqlite3 stk/stkservers.db
-   ```
+The database is now automatically initialized on first startup. The server will create all required tables automatically if the database doesn't exist or is empty.
 
-2. **Create required tables** (run these SQL commands in sqlite3):
+For manual database management, you can still access the database directly:
+```bash
+sqlite3 stk/stkservers.db
+```
+
+**Manual table creation** (only if needed):
    ```sql
    -- IPv4 ban list
    CREATE TABLE ip_ban (
@@ -296,12 +311,13 @@ This enhanced version includes several advanced features not found in the basic 
 - **Geolocation**: IP geolocation for player tracking (requires additional setup)
 
 ### Server Configuration Highlights
-- **High player count**: Supports up to 16 players (configurable, default 8 with performance warning)
+- **Supports up to 16 players**: Configurable in `server_config.xml` (default: 16, recommended: 8 for optimal performance)
 - **Multiple game modes**: Normal race, time trial, soccer, free-for-all, capture the flag
 - **AI kart management**: Automatic AI kart scaling based on player count (`ai-handling="true"`)
 - **Live spectating**: Players can join/spectate games in progress (`live-spectate="true"`)
 - **Advanced networking**: IPv6 support, high ping workarounds, STUN for NAT traversal
 - **Enhanced difficulty**: Set to SuperTux difficulty (3) - the most challenging level
+- **Resource limits**: Configurable CPU/memory limits to prevent host system overload
 
 ### Volume Mounts Explained
 - `server_config.xml`: Server configuration file
